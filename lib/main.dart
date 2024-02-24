@@ -1,9 +1,29 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:mate_app/repo/cache_repo.dart';
+import 'package:mate_app/repo/chat_message_repo.dart';
+import 'package:mate_app/repo/creative_island_repo.dart';
+import 'package:mate_app/repo/data/cache_data.dart';
+import 'package:mate_app/repo/data/chat_history.dart';
+import 'package:mate_app/repo/data/chat_message_data.dart';
+import 'package:mate_app/repo/data/creative_island_data.dart';
+import 'package:mate_app/repo/data/room_data.dart';
+import 'package:mate_app/repo/data/setting_data.dart';
+import 'package:mate_app/repo/settings_repo.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:mate_app/helper/http.dart' as httpx;
 
+import 'data/migrate.dart';
+import 'helper/constant.dart';
 import 'helper/logger.dart';
 import 'helper/path.dart';
+
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
+import 'helper/platform.dart';
+import 'package:path/path.dart';
+
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,8 +46,58 @@ void main() async{
     );
     print(details.stack);
   };
-  
-  
+
+  if (kIsWeb) {
+    databaseFactory = databaseFactoryFfiWeb;
+  } else {
+    if (PlatformTool.isWindows() ||
+        PlatformTool.isLinux() ||
+        PlatformTool.isMacOS()) {
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+      var path = absolute(join(PathHelper().getHomePath, 'databases'));
+      databaseFactory.setDatabasesPath(path);
+    }
+  }
+
+  // 数据库连接
+  final db = await databaseFactory.openDatabase(
+    'system.db',
+    options: OpenDatabaseOptions(
+      version: databaseVersion,
+      onUpgrade: (db, oldVersion, newVersion) async {
+        try {
+          await migrate(db, oldVersion, newVersion);
+        } catch (e) {
+          Logger.instance.e('数据库升级失败', error: e);
+        }
+      },
+      onCreate: initDatabase,
+      onOpen: (db) {
+        Logger.instance.i('数据库存储路径：${db.path}');
+      },
+    ),
+  );
+
+  // 加载配置
+  final settingProvider = SettingDataProvider(db);
+  await settingProvider.loadSettings();
+
+  // 创建数据仓库
+  final settingRepo = SettingRepository(settingProvider);
+  //final openAIRepo = OpenAIRepository(settingProvider);
+  //final deepAIRepo = DeepAIRepository(settingProvider);
+  //final stabilityAIRepo = StabilityAIRepository(settingProvider);
+  final cacheRepo = CacheRepository(CacheDataProvider(db));
+
+  final chatMsgRepo = ChatMessageRepository(
+    RoomDataProvider(db),
+    ChatMessageDataProvider(db),
+    ChatHistoryProvider(db),
+  );
+
+  final creativeIslandRepo =
+  CreativeIslandRepository(CreativeIslandDataProvider(db));
   
   
   
