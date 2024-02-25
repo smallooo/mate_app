@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:mate_app/page/component/chat/message_state_manager.dart';
+import 'package:mate_app/repo/api_server.dart';
 import 'package:mate_app/repo/cache_repo.dart';
 import 'package:mate_app/repo/chat_message_repo.dart';
 import 'package:mate_app/repo/creative_island_repo.dart';
@@ -98,8 +100,54 @@ void main() async{
 
   final creativeIslandRepo =
   CreativeIslandRepository(CreativeIslandDataProvider(db));
-  
-  
+
+  // 聊天状态加载器
+  final stateManager = MessageStateManager(cacheRepo);
+
+  // // 初始化聊天实现解析器
+  // ModelResolver.instance.init(
+  //   openAIRepo: openAIRepo,
+  //   deepAIRepo: deepAIRepo,
+  //   stabilityAIRepo: stabilityAIRepo,
+  // );
+
+  APIServer().init(settingRepo);
+  // ModelAggregate.init(settingRepo);
+  // Cache().init(settingRepo, cacheRepo);
+  //
+  // // 从服务器获取客户端支持的能力清单
+  // try {
+  //   final capabilities = await APIServer().capabilities(cache: false);
+  //   Ability().init(settingRepo, capabilities);
+  // } catch (e) {
+  //   Logger.instance.e('获取客户端能力清单失败', error: e);
+  //   Ability().init(
+  //     settingRepo,
+  //     Capabilities(
+  //       applePayEnabled: true,
+  //       otherPayEnabled: true,
+  //       translateEnabled: true,
+  //       mailEnabled: true,
+  //       openaiEnabled: true,
+  //       homeModels: [],
+  //       homeRoute: '/chat-chat',
+  //       showHomeModelDescription: true,
+  //       supportWebsocket: false,
+  //     ),
+  //   );
+  // }
+  //
+  // // 初始化聊天室 Bloc 管理器
+  // final m = ChatBlocManager();
+  // m.init((roomId, {chatHistoryId}) {
+  //   return ChatMessageBloc(
+  //     roomId,
+  //     chatHistoryId: chatHistoryId,
+  //     chatMsgRepo: chatMsgRepo,
+  //     settingRepo: settingRepo,
+  //   );
+  // });
+  //
   
   runApp( MyApp());
 }
