@@ -18,6 +18,7 @@ import 'package:mate_app/helper/http.dart' as httpx;
 import 'data/migrate.dart';
 import 'helper/constant.dart';
 import 'helper/logger.dart';
+import 'helper/model.dart';
 import 'helper/path.dart';
 
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
@@ -112,7 +113,7 @@ void main() async{
   // );
 
   APIServer().init(settingRepo);
-  // ModelAggregate.init(settingRepo);
+  ModelAggregate.init(settingRepo);
   // Cache().init(settingRepo, cacheRepo);
   //
   // // 从服务器获取客户端支持的能力清单
