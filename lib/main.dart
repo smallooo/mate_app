@@ -199,11 +199,11 @@ void main() async{
   Cache().init(settingRepo, cacheRepo);
 
   // 从服务器获取客户端支持的能力清单
-  try {
-    final capabilities = await APIServer().capabilities(cache: false);
-    Ability().init(settingRepo, capabilities);
-  } catch (e) {
-    Logger.instance.e('获取客户端能力清单失败', error: e);
+  // try {
+  //   final capabilities = await APIServer().capabilities(cache: false);
+  //   Ability().init(settingRepo, capabilities);
+  // } catch (e) {
+  //   Logger.instance.e('获取客户端能力清单失败', error: e);
     Ability().init(
       settingRepo,
       Capabilities(
@@ -218,18 +218,18 @@ void main() async{
         supportWebsocket: false,
       ),
     );
-  }
+  // }
 
-  // 初始化聊天室 Bloc 管理器
-  final m = ChatBlocManager();
-  m.init((roomId, {chatHistoryId}) {
-    return ChatMessageBloc(
-      roomId,
-      chatHistoryId: chatHistoryId,
-      chatMsgRepo: chatMsgRepo,
-      settingRepo: settingRepo,
-    );
-  });
+  // // 初始化聊天室 Bloc 管理器
+  // final m = ChatBlocManager();
+  // m.init((roomId, {chatHistoryId}) {
+  //   return ChatMessageBloc(
+  //     roomId,
+  //     chatHistoryId: chatHistoryId,
+  //     chatMsgRepo: chatMsgRepo,
+  //     settingRepo: settingRepo,
+  //   );
+  // });
 
   
   runApp( MyApp(
@@ -285,11 +285,13 @@ class MyApp extends StatefulWidget {
     final stabilityAISelfHosted =
     settingRepo.boolDefault(settingStabilityAISelfHosted, false);
 
-    final shouldLogin = (apiServerToken == null || apiServerToken == '') &&
-        !usingGuestMode &&
-        !openAISelfHosted &&
-        !deepAISelfHosted &&
-        !stabilityAISelfHosted;
+    // final shouldLogin = (apiServerToken == null || apiServerToken == '') &&
+    //     !usingGuestMode &&
+    //     !openAISelfHosted &&
+    //     !deepAISelfHosted &&
+    //     !stabilityAISelfHosted;
+    
+    final shouldLogin = false;
 
     _router = GoRouter(
       initialLocation: shouldLogin ? '/login' : Ability().homeRoute,
@@ -1122,7 +1124,7 @@ class _MyAppState extends State<MyApp> {
             return Sizer(
               builder: (context, orientation, deviceType) {
                 return MaterialApp.router(
-                  title: 'AIdea111',
+                  title: 'AIdea',
                   themeMode: appTheme.mode,
                   theme: createLightThemeData(),
                   darkTheme: createDarkThemeData(),
