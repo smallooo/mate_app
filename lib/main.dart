@@ -14,15 +14,32 @@ import 'package:mate_app/page/auth/signup_screen.dart';
 import 'package:mate_app/page/chat/home.dart';
 import 'package:mate_app/page/chat/home_chat.dart';
 import 'package:mate_app/page/chat/home_chat_history.dart';
+import 'package:mate_app/page/chat/room_chat.dart';
+import 'package:mate_app/page/chat/room_create.dart';
+import 'package:mate_app/page/chat/room_edit.dart';
+import 'package:mate_app/page/chat/rooms.dart';
 import 'package:mate_app/page/component/chat/message_state_manager.dart';
 import 'package:mate_app/page/component/random_avatar.dart';
 import 'package:mate_app/page/component/theme/custom_theme.dart';
 import 'package:mate_app/page/component/theme/theme.dart';
 import 'package:mate_app/page/component/transition_resolver.dart';
+import 'package:mate_app/page/creative_island/draw/artistic_qr.dart';
+import 'package:mate_app/page/creative_island/draw/artistic_wordart.dart';
+import 'package:mate_app/page/creative_island/draw/draw_list.dart';
+import 'package:mate_app/page/creative_island/draw/image_edit_direct.dart';
+import 'package:mate_app/page/creative_island/draw_create.dart';
+import 'package:mate_app/page/creative_island/gallery/gallery_item.dart';
+import 'package:mate_app/page/creative_island/my_creation.dart';
 import 'package:mate_app/page/lab/avatar_selector.dart';
+import 'package:mate_app/page/lab/draw_board.dart';
+import 'package:mate_app/page/lab/user_center.dart';
+import 'package:mate_app/page/setting/account_security.dart';
+import 'package:mate_app/page/setting/background_selector.dart';
 import 'package:mate_app/page/setting/change_password.dart';
 import 'package:mate_app/page/setting/destroy_account.dart';
+import 'package:mate_app/page/setting/openai_setting.dart';
 import 'package:mate_app/page/setting/retrieve_password_screen.dart';
+import 'package:mate_app/page/setting/setting_screen.dart';
 import 'package:mate_app/repo/api/info.dart';
 import 'package:mate_app/repo/api_server.dart';
 import 'package:mate_app/repo/cache_repo.dart';
@@ -44,9 +61,11 @@ import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 
 import 'bloc/account_bloc.dart';
+import 'bloc/background_image_bloc.dart';
 import 'bloc/bloc_manager.dart';
 import 'bloc/chat_chat_bloc.dart';
 import 'bloc/chat_message_bloc.dart';
+import 'bloc/creative_island_bloc.dart';
 import 'bloc/free_count_bloc.dart';
 import 'bloc/gallery_bloc.dart';
 import 'bloc/notify_bloc.dart';
@@ -412,329 +431,329 @@ class MyApp extends StatefulWidget {
                 const AvatarSelectorScreen(usage: AvatarUsage.room),
               ),
             ),
-            // GoRoute(
-            //   path: '/lab/draw-board',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) => transitionResolver(
-            //     const DrawboardScreen(),
-            //   ),
-            // ),
-            // GoRoute(
-            //   name: 'characters',
-            //   path: '/',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) => transitionResolver(
-            //     MultiBlocProvider(
-            //       providers: [BlocProvider.value(value: chatRoomBloc)],
-            //       child: RoomsPage(setting: settingRepo),
-            //     ),
-            //   ),
-            // ),
-            // GoRoute(
-            //   name: 'create-room',
-            //   path: '/create-room',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) => transitionResolver(
-            //     MultiBlocProvider(
-            //       providers: [BlocProvider.value(value: chatRoomBloc)],
-            //       child: RoomCreatePage(setting: settingRepo),
-            //     ),
-            //   ),
-            // ),
-            // GoRoute(
-            //   name: 'chat',
-            //   path: '/room/:room_id/chat',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) {
-            //     final roomId = int.parse(state.pathParameters['room_id']!);
-            //     return transitionResolver(
-            //       MultiBlocProvider(
-            //         providers: [
-            //           BlocProvider.value(
-            //             value: ChatBlocManager().getBloc(roomId),
-            //           ),
-            //           BlocProvider.value(value: chatRoomBloc),
-            //           BlocProvider(create: (context) => NotifyBloc()),
-            //           BlocProvider.value(value: freeCountBloc),
-            //         ],
-            //         child: RoomChatPage(
-            //           roomId: roomId,
-            //           stateManager: messageStateManager,
-            //           setting: settingRepo,
-            //         ),
-            //       ),
-            //     );
-            //   },
-            // ),
-            // GoRoute(
-            //   name: 'room_setting',
-            //   path: '/room/:room_id/setting',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) {
-            //     final roomId = int.parse(state.pathParameters['room_id']!);
-            //     return transitionResolver(
-            //       MultiBlocProvider(
-            //         providers: [
-            //           BlocProvider.value(value: chatRoomBloc),
-            //           BlocProvider.value(
-            //             value: ChatBlocManager().getBloc(roomId),
-            //           ),
-            //         ],
-            //         child: RoomEditPage(roomId: roomId, setting: settingRepo),
-            //       ),
-            //     );
-            //   },
-            // ),
-            // GoRoute(
-            //   name: 'account-security-setting',
-            //   path: '/setting/account-security',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) => transitionResolver(
-            //     MultiBlocProvider(
-            //       providers: [
-            //         BlocProvider.value(value: accountBloc),
-            //       ],
-            //       child: AccountSecurityScreen(
-            //         settings: context.read<SettingRepository>(),
-            //       ),
-            //     ),
-            //   ),
-            // ),
-            // GoRoute(
-            //   name: 'lab-user-center',
-            //   path: '/lab/user-center',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) => transitionResolver(
-            //     MultiBlocProvider(
-            //       providers: [
-            //         BlocProvider.value(value: accountBloc),
-            //         BlocProvider(
-            //             create: (context) =>
-            //                 CreativeIslandBloc(creativeIslandRepo)),
-            //       ],
-            //       child: UserCenterScreen(
-            //           settings: context.read<SettingRepository>()),
-            //     ),
-            //   ),
-            // ),
-            // GoRoute(
-            //   name: 'setting',
-            //   path: '/setting',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) => transitionResolver(
-            //     MultiBlocProvider(
-            //       providers: [
-            //         BlocProvider.value(value: accountBloc),
-            //       ],
-            //       child: SettingScreen(
-            //           settings: context.read<SettingRepository>()),
-            //     ),
-            //   ),
-            // ),
-            // GoRoute(
-            //   name: 'setting-background-selector',
-            //   path: '/setting/background-selector',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) => transitionResolver(
-            //     BlocProvider(
-            //       create: (context) => BackgroundImageBloc(),
-            //       child: BackgroundSelectorScreen(setting: settingRepo),
-            //     ),
-            //   ),
-            // ),
-            // GoRoute(
-            //   name: 'setting-openai-custom',
-            //   path: '/setting/openai-custom',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) => transitionResolver(
-            //     OpenAISettingScreen(
-            //       settings: settingRepo,
-            //       source: state.queryParameters['source'],
-            //     ),
-            //   ),
-            // ),
-            // GoRoute(
-            //   name: 'creative-draw',
-            //   path: '/creative-draw',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) => transitionResolver(
-            //     MultiBlocProvider(
-            //       providers: [
-            //         BlocProvider(
-            //             create: (context) =>
-            //                 CreativeIslandBloc(creativeIslandRepo)),
-            //       ],
-            //       child: DrawListScreen(
-            //         setting: settingRepo,
-            //       ),
-            //     ),
-            //   ),
-            // ),
-            // GoRoute(
-            //   name: 'creative-upscale',
-            //   path: '/creative-draw/create-upscale',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) => transitionResolver(
-            //     MultiBlocProvider(
-            //       providers: [
-            //         BlocProvider(
-            //             create: (context) =>
-            //                 CreativeIslandBloc(creativeIslandRepo)),
-            //       ],
-            //       child: ImageEditDirectScreen(
-            //         setting: settingRepo,
-            //         title: AppLocale.superResolution.getString(context),
-            //         apiEndpoint: 'upscale',
-            //         note: state.queryParameters['note'],
-            //         initWaitDuration: 15,
-            //         initImage: state.queryParameters['init_image'],
-            //       ),
-            //     ),
-            //   ),
-            // ),
-            // GoRoute(
-            //   name: 'creative-colorize',
-            //   path: '/creative-draw/create-colorize',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) => transitionResolver(
-            //     MultiBlocProvider(
-            //       providers: [
-            //         BlocProvider(
-            //             create: (context) =>
-            //                 CreativeIslandBloc(creativeIslandRepo)),
-            //       ],
-            //       child: ImageEditDirectScreen(
-            //         setting: settingRepo,
-            //         title: AppLocale.colorizeImage.getString(context),
-            //         apiEndpoint: 'colorize',
-            //         note: state.queryParameters['note'],
-            //         initWaitDuration: 15,
-            //         initImage: state.queryParameters['init_image'],
-            //       ),
-            //     ),
-            //   ),
-            // ),
-            // GoRoute(
-            //   name: 'creative-video',
-            //   path: '/creative-draw/create-video',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) => transitionResolver(
-            //     MultiBlocProvider(
-            //       providers: [
-            //         BlocProvider(
-            //             create: (context) =>
-            //                 CreativeIslandBloc(creativeIslandRepo)),
-            //       ],
-            //       child: ImageEditDirectScreen(
-            //         setting: settingRepo,
-            //         title: '图生视频',
-            //         apiEndpoint: 'image-to-video',
-            //         note: state.queryParameters['note'],
-            //         initWaitDuration: 60,
-            //         initImage: state.queryParameters['init_image'],
-            //       ),
-            //     ),
-            //   ),
-            // ),
-            // GoRoute(
-            //   name: 'creative-draw-gallery-preview',
-            //   path: '/creative-draw/gallery/:id',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) => transitionResolver(
-            //     MultiBlocProvider(
-            //       providers: [
-            //         BlocProvider.value(value: galleryBloc),
-            //       ],
-            //       child: GalleryItemScreen(
-            //         setting: settingRepo,
-            //         galleryId: int.parse(state.pathParameters['id']!),
-            //       ),
-            //     ),
-            //   ),
-            // ),
-            // GoRoute(
-            //   name: 'creative-draw-create',
-            //   path: '/creative-draw/create',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) => transitionResolver(
-            //     MultiBlocProvider(
-            //       providers: [
-            //         BlocProvider.value(value: galleryBloc),
-            //       ],
-            //       child: DrawCreateScreen(
-            //         setting: settingRepo,
-            //         galleryCopyId: int.tryParse(
-            //           state.queryParameters['gallery_copy_id'] ?? '',
-            //         ),
-            //         mode: state.queryParameters['mode']!,
-            //         id: state.queryParameters['id']!,
-            //         note: state.queryParameters['note'],
-            //         initImage: state.queryParameters['init_image'],
-            //       ),
-            //     ),
-            //   ),
-            // ),
-            // GoRoute(
-            //   name: 'creative-artistic-text',
-            //   path: '/creative-draw/artistic-text',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) => transitionResolver(
-            //     MultiBlocProvider(
-            //       providers: [
-            //         BlocProvider.value(value: galleryBloc),
-            //       ],
-            //       child: ArtisticQRScreen(
-            //         setting: settingRepo,
-            //         galleryCopyId: int.tryParse(
-            //           state.queryParameters['gallery_copy_id'] ?? '',
-            //         ),
-            //         type: state.queryParameters['type']!,
-            //         id: state.queryParameters['id']!,
-            //         note: state.queryParameters['note'],
-            //       ),
-            //     ),
-            //   ),
-            // ),
-            // GoRoute(
-            //   name: 'creative-artistic-wordart',
-            //   path: '/creative-draw/artistic-wordart',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) => transitionResolver(
-            //     MultiBlocProvider(
-            //       providers: [
-            //         BlocProvider.value(value: galleryBloc),
-            //       ],
-            //       child: ArtisticWordArtScreen(
-            //         setting: settingRepo,
-            //         galleryCopyId: int.tryParse(
-            //           state.queryParameters['gallery_copy_id'] ?? '',
-            //         ),
-            //         id: state.queryParameters['id']!,
-            //         note: state.queryParameters['note'],
-            //       ),
-            //     ),
-            //   ),
-            // ),
-            // GoRoute(
-            //   name: 'creative-island-history-all',
-            //   path: '/creative-island/history',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) {
-            //     return transitionResolver(
-            //       MultiBlocProvider(
-            //         providers: [
-            //           BlocProvider(
-            //               create: (context) =>
-            //                   CreativeIslandBloc(creativeIslandRepo)),
-            //         ],
-            //         child: MyCreationScreen(
-            //           setting: settingRepo,
-            //           mode: state.queryParameters['mode'] ?? '',
-            //         ),
-            //       ),
-            //     );
-            //   },
-            // ),
+            GoRoute(
+              path: '/lab/draw-board',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) => transitionResolver(
+                const DrawboardScreen(),
+              ),
+            ),
+            GoRoute(
+              name: 'characters',
+              path: '/',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) => transitionResolver(
+                MultiBlocProvider(
+                  providers: [BlocProvider.value(value: chatRoomBloc)],
+                  child: RoomsPage(setting: settingRepo),
+                ),
+              ),
+            ),
+            GoRoute(
+              name: 'create-room',
+              path: '/create-room',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) => transitionResolver(
+                MultiBlocProvider(
+                  providers: [BlocProvider.value(value: chatRoomBloc)],
+                  child: RoomCreatePage(setting: settingRepo),
+                ),
+              ),
+            ),
+            GoRoute(
+              name: 'chat',
+              path: '/room/:room_id/chat',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) {
+                final roomId = int.parse(state.pathParameters['room_id']!);
+                return transitionResolver(
+                  MultiBlocProvider(
+                    providers: [
+                      BlocProvider.value(
+                        value: ChatBlocManager().getBloc(roomId),
+                      ),
+                      BlocProvider.value(value: chatRoomBloc),
+                      BlocProvider(create: (context) => NotifyBloc()),
+                      BlocProvider.value(value: freeCountBloc),
+                    ],
+                    child: RoomChatPage(
+                      roomId: roomId,
+                      stateManager: messageStateManager,
+                      setting: settingRepo,
+                    ),
+                  ),
+                );
+              },
+            ),
+            GoRoute(
+              name: 'room_setting',
+              path: '/room/:room_id/setting',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) {
+                final roomId = int.parse(state.pathParameters['room_id']!);
+                return transitionResolver(
+                  MultiBlocProvider(
+                    providers: [
+                      BlocProvider.value(value: chatRoomBloc),
+                      BlocProvider.value(
+                        value: ChatBlocManager().getBloc(roomId),
+                      ),
+                    ],
+                    child: RoomEditPage(roomId: roomId, setting: settingRepo),
+                  ),
+                );
+              },
+            ),
+            GoRoute(
+              name: 'account-security-setting',
+              path: '/setting/account-security',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) => transitionResolver(
+                MultiBlocProvider(
+                  providers: [
+                    BlocProvider.value(value: accountBloc),
+                  ],
+                  child: AccountSecurityScreen(
+                    settings: context.read<SettingRepository>(),
+                  ),
+                ),
+              ),
+            ),
+            GoRoute(
+              name: 'lab-user-center',
+              path: '/lab/user-center',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) => transitionResolver(
+                MultiBlocProvider(
+                  providers: [
+                    BlocProvider.value(value: accountBloc),
+                    BlocProvider(
+                        create: (context) =>
+                            CreativeIslandBloc(creativeIslandRepo)),
+                  ],
+                  child: UserCenterScreen(
+                      settings: context.read<SettingRepository>()),
+                ),
+              ),
+            ),
+            GoRoute(
+              name: 'setting',
+              path: '/setting',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) => transitionResolver(
+                MultiBlocProvider(
+                  providers: [
+                    BlocProvider.value(value: accountBloc),
+                  ],
+                  child: SettingScreen(
+                      settings: context.read<SettingRepository>()),
+                ),
+              ),
+            ),
+            GoRoute(
+              name: 'setting-background-selector',
+              path: '/setting/background-selector',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) => transitionResolver(
+                BlocProvider(
+                  create: (context) => BackgroundImageBloc(),
+                  child: BackgroundSelectorScreen(setting: settingRepo),
+                ),
+              ),
+            ),
+            GoRoute(
+              name: 'setting-openai-custom',
+              path: '/setting/openai-custom',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) => transitionResolver(
+                OpenAISettingScreen(
+                  settings: settingRepo,
+                  source: state.queryParameters['source'],
+                ),
+              ),
+            ),
+            GoRoute(
+              name: 'creative-draw',
+              path: '/creative-draw',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) => transitionResolver(
+                MultiBlocProvider(
+                  providers: [
+                    BlocProvider(
+                        create: (context) =>
+                            CreativeIslandBloc(creativeIslandRepo)),
+                  ],
+                  child: DrawListScreen(
+                    setting: settingRepo,
+                  ),
+                ),
+              ),
+            ),
+            GoRoute(
+              name: 'creative-upscale',
+              path: '/creative-draw/create-upscale',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) => transitionResolver(
+                MultiBlocProvider(
+                  providers: [
+                    BlocProvider(
+                        create: (context) =>
+                            CreativeIslandBloc(creativeIslandRepo)),
+                  ],
+                  child: ImageEditDirectScreen(
+                    setting: settingRepo,
+                    title: AppLocale.superResolution.getString(context),
+                    apiEndpoint: 'upscale',
+                    note: state.queryParameters['note'],
+                    initWaitDuration: 15,
+                    initImage: state.queryParameters['init_image'],
+                  ),
+                ),
+              ),
+            ),
+            GoRoute(
+              name: 'creative-colorize',
+              path: '/creative-draw/create-colorize',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) => transitionResolver(
+                MultiBlocProvider(
+                  providers: [
+                    BlocProvider(
+                        create: (context) =>
+                            CreativeIslandBloc(creativeIslandRepo)),
+                  ],
+                  child: ImageEditDirectScreen(
+                    setting: settingRepo,
+                    title: AppLocale.colorizeImage.getString(context),
+                    apiEndpoint: 'colorize',
+                    note: state.queryParameters['note'],
+                    initWaitDuration: 15,
+                    initImage: state.queryParameters['init_image'],
+                  ),
+                ),
+              ),
+            ),
+            GoRoute(
+              name: 'creative-video',
+              path: '/creative-draw/create-video',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) => transitionResolver(
+                MultiBlocProvider(
+                  providers: [
+                    BlocProvider(
+                        create: (context) =>
+                            CreativeIslandBloc(creativeIslandRepo)),
+                  ],
+                  child: ImageEditDirectScreen(
+                    setting: settingRepo,
+                    title: '图生视频',
+                    apiEndpoint: 'image-to-video',
+                    note: state.queryParameters['note'],
+                    initWaitDuration: 60,
+                    initImage: state.queryParameters['init_image'],
+                  ),
+                ),
+              ),
+            ),
+            GoRoute(
+              name: 'creative-draw-gallery-preview',
+              path: '/creative-draw/gallery/:id',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) => transitionResolver(
+                MultiBlocProvider(
+                  providers: [
+                    BlocProvider.value(value: galleryBloc),
+                  ],
+                  child: GalleryItemScreen(
+                    setting: settingRepo,
+                    galleryId: int.parse(state.pathParameters['id']!),
+                  ),
+                ),
+              ),
+            ),
+            GoRoute(
+              name: 'creative-draw-create',
+              path: '/creative-draw/create',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) => transitionResolver(
+                MultiBlocProvider(
+                  providers: [
+                    BlocProvider.value(value: galleryBloc),
+                  ],
+                  child: DrawCreateScreen(
+                    setting: settingRepo,
+                    galleryCopyId: int.tryParse(
+                      state.queryParameters['gallery_copy_id'] ?? '',
+                    ),
+                    mode: state.queryParameters['mode']!,
+                    id: state.queryParameters['id']!,
+                    note: state.queryParameters['note'],
+                    initImage: state.queryParameters['init_image'],
+                  ),
+                ),
+              ),
+            ),
+            GoRoute(
+              name: 'creative-artistic-text',
+              path: '/creative-draw/artistic-text',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) => transitionResolver(
+                MultiBlocProvider(
+                  providers: [
+                    BlocProvider.value(value: galleryBloc),
+                  ],
+                  child: ArtisticQRScreen(
+                    setting: settingRepo,
+                    galleryCopyId: int.tryParse(
+                      state.queryParameters['gallery_copy_id'] ?? '',
+                    ),
+                    type: state.queryParameters['type']!,
+                    id: state.queryParameters['id']!,
+                    note: state.queryParameters['note'],
+                  ),
+                ),
+              ),
+            ),
+            GoRoute(
+              name: 'creative-artistic-wordart',
+              path: '/creative-draw/artistic-wordart',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) => transitionResolver(
+                MultiBlocProvider(
+                  providers: [
+                    BlocProvider.value(value: galleryBloc),
+                  ],
+                  child: ArtisticWordArtScreen(
+                    setting: settingRepo,
+                    galleryCopyId: int.tryParse(
+                      state.queryParameters['gallery_copy_id'] ?? '',
+                    ),
+                    id: state.queryParameters['id']!,
+                    note: state.queryParameters['note'],
+                  ),
+                ),
+              ),
+            ),
+            GoRoute(
+              name: 'creative-island-history-all',
+              path: '/creative-island/history',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) {
+                return transitionResolver(
+                  MultiBlocProvider(
+                    providers: [
+                      BlocProvider(
+                          create: (context) =>
+                              CreativeIslandBloc(creativeIslandRepo)),
+                    ],
+                    child: MyCreationScreen(
+                      setting: settingRepo,
+                      mode: state.queryParameters['mode'] ?? '',
+                    ),
+                  ),
+                );
+              },
+            ),
             // GoRoute(
             //   name: 'creative-island-models',
             //   path: '/creative-island/models',

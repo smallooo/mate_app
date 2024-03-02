@@ -107,10 +107,49 @@ dev_dependencies:
 
   flutter_lints: ^2.0.0
 
+flutter_icons:
+  image_path: "assets/app.png"
+  
+  macos:
+    generate: true
+  web:
+    generate: true
+  windows:
+    generate: true
+  ios: true
+  remove_alpha_ios: true
+  android: "launcher_icon"
+  adaptive_icon_background: '#FFFFFF'
+
 flutter:
 
 
   uses-material-design: true
+  
+  assets:
+    - assets/app.png
+    - assets/image-broken.png
+    - assets/wechat.png
+    - assets/friendroom.png
+    - assets/share.png
+    - assets/app-256-transparent.png
+    - assets/light-dark-auto.png
+    - assets/openai.png
+    - assets/background.png
+    - assets/background-dark.png
+    - assets/background-team.png
+    - assets/background-team-dark.png
+    - assets/background-creative-island.webp
+    - assets/background-creative-island-dark.webp
+    - assets/background-discovery.png
+    - assets/background-discovery-dark.webp
+    - assets/transport.png
+    - assets/weibo.png
+    - assets/github.png
+    - assets/x.png
+    - assets/xiaohongshu.png
+    - assets/play.png
+    - assets/text-to-video.gif
 
 tobias:
   url_scheme: tobiasexample
