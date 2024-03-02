@@ -7,10 +7,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'package:fluwx/fluwx.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:mate_app/page/app_scaffold.dart';
 import 'package:mate_app/page/auth/signin_or_signup.dart';
 import 'package:mate_app/page/auth/signin_screen.dart';
 import 'package:mate_app/page/auth/signup_screen.dart';
+import 'package:mate_app/page/balance/free_statistics.dart';
+import 'package:mate_app/page/balance/payment.dart';
+import 'package:mate_app/page/balance/payment_history.dart';
+import 'package:mate_app/page/balance/quota_usage_details.dart';
+import 'package:mate_app/page/balance/quota_usage_statistics.dart';
+import 'package:mate_app/page/chat/group/chat.dart';
+import 'package:mate_app/page/chat/group/create.dart';
+import 'package:mate_app/page/chat/group/edit.dart';
 import 'package:mate_app/page/chat/home.dart';
 import 'package:mate_app/page/chat/home_chat.dart';
 import 'package:mate_app/page/chat/home_chat_history.dart';
@@ -28,18 +37,28 @@ import 'package:mate_app/page/creative_island/draw/artistic_wordart.dart';
 import 'package:mate_app/page/creative_island/draw/draw_list.dart';
 import 'package:mate_app/page/creative_island/draw/image_edit_direct.dart';
 import 'package:mate_app/page/creative_island/draw_create.dart';
+import 'package:mate_app/page/creative_island/gallery/gallery.dart';
 import 'package:mate_app/page/creative_island/gallery/gallery_item.dart';
 import 'package:mate_app/page/creative_island/my_creation.dart';
+import 'package:mate_app/page/creative_island/my_creation_item.dart';
 import 'package:mate_app/page/lab/avatar_selector.dart';
+import 'package:mate_app/page/lab/creative_models.dart';
 import 'package:mate_app/page/lab/draw_board.dart';
+import 'package:mate_app/page/lab/prompt.dart';
 import 'package:mate_app/page/lab/user_center.dart';
 import 'package:mate_app/page/setting/account_security.dart';
+import 'package:mate_app/page/setting/article.dart';
 import 'package:mate_app/page/setting/background_selector.dart';
+import 'package:mate_app/page/setting/bind_phone_page.dart';
 import 'package:mate_app/page/setting/change_password.dart';
+import 'package:mate_app/page/setting/custom_home_models.dart';
 import 'package:mate_app/page/setting/destroy_account.dart';
+import 'package:mate_app/page/setting/diagnosis.dart';
+import 'package:mate_app/page/setting/notification.dart';
 import 'package:mate_app/page/setting/openai_setting.dart';
 import 'package:mate_app/page/setting/retrieve_password_screen.dart';
 import 'package:mate_app/page/setting/setting_screen.dart';
+import 'package:mate_app/page/setting/user_api_keys.dart';
 import 'package:mate_app/repo/api/info.dart';
 import 'package:mate_app/repo/api_server.dart';
 import 'package:mate_app/repo/cache_repo.dart';
@@ -68,8 +87,11 @@ import 'bloc/chat_message_bloc.dart';
 import 'bloc/creative_island_bloc.dart';
 import 'bloc/free_count_bloc.dart';
 import 'bloc/gallery_bloc.dart';
+import 'bloc/group_chat_bloc.dart';
 import 'bloc/notify_bloc.dart';
+import 'bloc/payment_bloc.dart';
 import 'bloc/room_bloc.dart';
+import 'bloc/user_api_keys_bloc.dart';
 import 'bloc/version_bloc.dart';
 import 'data/migrate.dart';
 import 'helper/ability.dart';
@@ -754,265 +776,265 @@ class MyApp extends StatefulWidget {
                 );
               },
             ),
-            // GoRoute(
-            //   name: 'creative-island-models',
-            //   path: '/creative-island/models',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) {
-            //     return transitionResolver(
-            //       MultiBlocProvider(
-            //         providers: [
-            //           BlocProvider(
-            //               create: (context) =>
-            //                   CreativeIslandBloc(creativeIslandRepo)),
-            //         ],
-            //         child: CreativeModelScreen(setting: settingRepo),
-            //       ),
-            //     );
-            //   },
-            // ),
-            // GoRoute(
-            //   name: 'creative-island-history-item',
-            //   path: '/creative-island/:id/history/:item_id',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) {
-            //     final id = state.pathParameters['id']!;
-            //     final itemId = int.tryParse(state.pathParameters['item_id']!);
-            //     final showErrorMessage =
-            //         state.queryParameters['show_error'] == 'true';
-            //     return transitionResolver(
-            //       MultiBlocProvider(
-            //         providers: [
-            //           BlocProvider(
-            //               create: (context) =>
-            //                   CreativeIslandBloc(creativeIslandRepo)),
-            //         ],
-            //         child: MyCreationItemPage(
-            //           setting: settingRepo,
-            //           islandId: id,
-            //           itemId: itemId!,
-            //           showErrorMessage: showErrorMessage,
-            //         ),
-            //       ),
-            //     );
-            //   },
-            // ),
-            // GoRoute(
-            //   name: 'quota-details',
-            //   path: '/quota-details',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) => transitionResolver(
-            //     PaymentHistoryScreen(setting: settingRepo),
-            //   ),
-            // ),
-            // GoRoute(
-            //   name: 'quota-usage-statistics',
-            //   path: '/quota-usage-statistics',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) => transitionResolver(
-            //     QuotaUsageStatisticsScreen(setting: settingRepo),
-            //   ),
-            // ),
-            // GoRoute(
-            //   name: 'quota-usage-daily-details',
-            //   path: '/quota-usage-daily-details',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) => transitionResolver(
-            //     QuotaUsageDetailScreen(
-            //       setting: settingRepo,
-            //       date: state.queryParameters['date'] ??
-            //           DateFormat('yyyy-MM-dd').format(DateTime.now()),
-            //     ),
-            //   ),
-            // ),
-            // GoRoute(
-            //   name: 'prompt-editor',
-            //   path: '/prompt-editor',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) {
-            //     var prompt = state.queryParameters['prompt'] ?? '';
-            //     return transitionResolver(PromptScreen(prompt: prompt));
-            //   },
-            // ),
-            // GoRoute(
-            //   name: 'payment',
-            //   path: '/payment',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) {
-            //     return transitionResolver(
-            //       MultiBlocProvider(
-            //         providers: [
-            //           BlocProvider(create: ((context) => PaymentBloc())),
-            //         ],
-            //         child: PaymentScreen(setting: settingRepo),
-            //       ),
-            //     );
-            //   },
-            // ),
-            // GoRoute(
-            //   name: 'bind-phone',
-            //   path: '/bind-phone',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) {
-            //     return transitionResolver(
-            //       MultiBlocProvider(
-            //         providers: [
-            //           BlocProvider.value(value: accountBloc),
-            //         ],
-            //         child: BindPhoneScreen(
-            //           setting: settingRepo,
-            //           isSignIn: state.queryParameters['is_signin'] != 'false',
-            //         ),
-            //       ),
-            //     );
-            //   },
-            // ),
-            // GoRoute(
-            //   name: 'creative-gallery',
-            //   path: '/creative-gallery',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) => transitionResolver(
-            //     MultiBlocProvider(
-            //       providers: [
-            //         BlocProvider.value(value: galleryBloc),
-            //       ],
-            //       child: GalleryScreen(setting: settingRepo),
-            //     ),
-            //   ),
-            // ),
-            // GoRoute(
-            //   name: 'diagnosis',
-            //   path: '/diagnosis',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) => transitionResolver(
-            //     DiagnosisScreen(setting: settingRepo),
-            //   ),
-            // ),
-            // GoRoute(
-            //   name: 'free-statistics',
-            //   path: '/free-statistics',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) => transitionResolver(
-            //     MultiBlocProvider(
-            //       providers: [BlocProvider.value(value: freeCountBloc)],
-            //       child: FreeStatisticsPage(setting: settingRepo),
-            //     ),
-            //   ),
-            // ),
-            // GoRoute(
-            //   name: 'custom-home-models',
-            //   path: '/setting/custom-home-models',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) => transitionResolver(
-            //     CustomHomeModelsPage(setting: settingRepo),
-            //   ),
-            // ),
-            // GoRoute(
-            //   name: 'group-chat-chat',
-            //   path: '/group-chat/:group_id/chat',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) {
-            //     final groupId = int.tryParse(state.pathParameters['group_id']!);
-            //
-            //     return transitionResolver(
-            //       MultiBlocProvider(
-            //         providers: [
-            //           BlocProvider(
-            //             create: ((context) =>
-            //                 GroupChatBloc(stateManager: messageStateManager)),
-            //           ),
-            //           BlocProvider.value(value: chatRoomBloc),
-            //         ],
-            //         child: GroupChatPage(
-            //           setting: settingRepo,
-            //           stateManager: messageStateManager,
-            //           groupId: groupId!,
-            //         ),
-            //       ),
-            //     );
-            //   },
-            // ),
-            // GoRoute(
-            //   name: 'group-chat-create',
-            //   path: '/group-chat-create',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) {
-            //     return transitionResolver(
-            //       MultiBlocProvider(
-            //         providers: [
-            //           BlocProvider(
-            //             create: ((context) =>
-            //                 GroupChatBloc(stateManager: messageStateManager)),
-            //           ),
-            //           BlocProvider.value(value: chatRoomBloc),
-            //         ],
-            //         child: GroupCreatePage(setting: settingRepo),
-            //       ),
-            //     );
-            //   },
-            // ),
-            // GoRoute(
-            //   name: 'group-chat-edit',
-            //   path: '/group-chat/:group_id/edit',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) {
-            //     return transitionResolver(
-            //       MultiBlocProvider(
-            //         providers: [
-            //           BlocProvider(
-            //             create: ((context) =>
-            //                 GroupChatBloc(stateManager: messageStateManager)),
-            //           ),
-            //           BlocProvider.value(value: chatRoomBloc),
-            //         ],
-            //         child: GroupEditPage(
-            //           setting: settingRepo,
-            //           groupId: int.tryParse(state.pathParameters['group_id']!)!,
-            //         ),
-            //       ),
-            //     );
-            //   },
-            // ),
-            // GoRoute(
-            //   name: 'user-api-keys',
-            //   path: '/setting/user-api-keys',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) {
-            //     return transitionResolver(
-            //       MultiBlocProvider(
-            //         providers: [
-            //           BlocProvider(
-            //             create: ((context) => UserApiKeysBloc()),
-            //           ),
-            //         ],
-            //         child: UserAPIKeysScreen(setting: settingRepo),
-            //       ),
-            //     );
-            //   },
-            // ),
-            // GoRoute(
-            //   name: 'notifications',
-            //   path: '/notifications',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) {
-            //     return transitionResolver(
-            //       NotificationScreen(setting: settingRepo),
-            //     );
-            //   },
-            // ),
-            // GoRoute(
-            //   name: 'articles',
-            //   path: '/article',
-            //   parentNavigatorKey: _shellNavigatorKey,
-            //   pageBuilder: (context, state) {
-            //     return transitionResolver(
-            //       ArticleScreen(
-            //         settings: settingRepo,
-            //         id: int.tryParse(state.queryParameters['id'] ?? '') ?? 0,
-            //       ),
-            //     );
-            //   },
-            // ),
+            GoRoute(
+              name: 'creative-island-models',
+              path: '/creative-island/models',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) {
+                return transitionResolver(
+                  MultiBlocProvider(
+                    providers: [
+                      BlocProvider(
+                          create: (context) =>
+                              CreativeIslandBloc(creativeIslandRepo)),
+                    ],
+                    child: CreativeModelScreen(setting: settingRepo),
+                  ),
+                );
+              },
+            ),
+            GoRoute(
+              name: 'creative-island-history-item',
+              path: '/creative-island/:id/history/:item_id',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) {
+                final id = state.pathParameters['id']!;
+                final itemId = int.tryParse(state.pathParameters['item_id']!);
+                final showErrorMessage =
+                    state.queryParameters['show_error'] == 'true';
+                return transitionResolver(
+                  MultiBlocProvider(
+                    providers: [
+                      BlocProvider(
+                          create: (context) =>
+                              CreativeIslandBloc(creativeIslandRepo)),
+                    ],
+                    child: MyCreationItemPage(
+                      setting: settingRepo,
+                      islandId: id,
+                      itemId: itemId!,
+                      showErrorMessage: showErrorMessage,
+                    ),
+                  ),
+                );
+              },
+            ),
+            GoRoute(
+              name: 'quota-details',
+              path: '/quota-details',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) => transitionResolver(
+                PaymentHistoryScreen(setting: settingRepo),
+              ),
+            ),
+            GoRoute(
+              name: 'quota-usage-statistics',
+              path: '/quota-usage-statistics',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) => transitionResolver(
+                QuotaUsageStatisticsScreen(setting: settingRepo),
+              ),
+            ),
+            GoRoute(
+              name: 'quota-usage-daily-details',
+              path: '/quota-usage-daily-details',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) => transitionResolver(
+                QuotaUsageDetailScreen(
+                  setting: settingRepo,
+                  date: state.queryParameters['date'] ??
+                      DateFormat('yyyy-MM-dd').format(DateTime.now()),
+                ),
+              ),
+            ),
+            GoRoute(
+              name: 'prompt-editor',
+              path: '/prompt-editor',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) {
+                var prompt = state.queryParameters['prompt'] ?? '';
+                return transitionResolver(PromptScreen(prompt: prompt));
+              },
+            ),
+            GoRoute(
+              name: 'payment',
+              path: '/payment',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) {
+                return transitionResolver(
+                  MultiBlocProvider(
+                    providers: [
+                      BlocProvider(create: ((context) => PaymentBloc())),
+                    ],
+                    child: PaymentScreen(setting: settingRepo),
+                  ),
+                );
+              },
+            ),
+            GoRoute(
+              name: 'bind-phone',
+              path: '/bind-phone',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) {
+                return transitionResolver(
+                  MultiBlocProvider(
+                    providers: [
+                      BlocProvider.value(value: accountBloc),
+                    ],
+                    child: BindPhoneScreen(
+                      setting: settingRepo,
+                      isSignIn: state.queryParameters['is_signin'] != 'false',
+                    ),
+                  ),
+                );
+              },
+            ),
+            GoRoute(
+              name: 'creative-gallery',
+              path: '/creative-gallery',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) => transitionResolver(
+                MultiBlocProvider(
+                  providers: [
+                    BlocProvider.value(value: galleryBloc),
+                  ],
+                  child: GalleryScreen(setting: settingRepo),
+                ),
+              ),
+            ),
+            GoRoute(
+              name: 'diagnosis',
+              path: '/diagnosis',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) => transitionResolver(
+                DiagnosisScreen(setting: settingRepo),
+              ),
+            ),
+            GoRoute(
+              name: 'free-statistics',
+              path: '/free-statistics',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) => transitionResolver(
+                MultiBlocProvider(
+                  providers: [BlocProvider.value(value: freeCountBloc)],
+                  child: FreeStatisticsPage(setting: settingRepo),
+                ),
+              ),
+            ),
+            GoRoute(
+              name: 'custom-home-models',
+              path: '/setting/custom-home-models',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) => transitionResolver(
+                CustomHomeModelsPage(setting: settingRepo),
+              ),
+            ),
+            GoRoute(
+              name: 'group-chat-chat',
+              path: '/group-chat/:group_id/chat',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) {
+                final groupId = int.tryParse(state.pathParameters['group_id']!);
+
+                return transitionResolver(
+                  MultiBlocProvider(
+                    providers: [
+                      BlocProvider(
+                        create: ((context) =>
+                            GroupChatBloc(stateManager: messageStateManager)),
+                      ),
+                      BlocProvider.value(value: chatRoomBloc),
+                    ],
+                    child: GroupChatPage(
+                      setting: settingRepo,
+                      stateManager: messageStateManager,
+                      groupId: groupId!,
+                    ),
+                  ),
+                );
+              },
+            ),
+            GoRoute(
+              name: 'group-chat-create',
+              path: '/group-chat-create',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) {
+                return transitionResolver(
+                  MultiBlocProvider(
+                    providers: [
+                      BlocProvider(
+                        create: ((context) =>
+                            GroupChatBloc(stateManager: messageStateManager)),
+                      ),
+                      BlocProvider.value(value: chatRoomBloc),
+                    ],
+                    child: GroupCreatePage(setting: settingRepo),
+                  ),
+                );
+              },
+            ),
+            GoRoute(
+              name: 'group-chat-edit',
+              path: '/group-chat/:group_id/edit',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) {
+                return transitionResolver(
+                  MultiBlocProvider(
+                    providers: [
+                      BlocProvider(
+                        create: ((context) =>
+                            GroupChatBloc(stateManager: messageStateManager)),
+                      ),
+                      BlocProvider.value(value: chatRoomBloc),
+                    ],
+                    child: GroupEditPage(
+                      setting: settingRepo,
+                      groupId: int.tryParse(state.pathParameters['group_id']!)!,
+                    ),
+                  ),
+                );
+              },
+            ),
+            GoRoute(
+              name: 'user-api-keys',
+              path: '/setting/user-api-keys',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) {
+                return transitionResolver(
+                  MultiBlocProvider(
+                    providers: [
+                      BlocProvider(
+                        create: ((context) => UserApiKeysBloc()),
+                      ),
+                    ],
+                    child: UserAPIKeysScreen(setting: settingRepo),
+                  ),
+                );
+              },
+            ),
+            GoRoute(
+              name: 'notifications',
+              path: '/notifications',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) {
+                return transitionResolver(
+                  NotificationScreen(setting: settingRepo),
+                );
+              },
+            ),
+            GoRoute(
+              name: 'articles',
+              path: '/article',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) {
+                return transitionResolver(
+                  ArticleScreen(
+                    settings: settingRepo,
+                    id: int.tryParse(state.queryParameters['id'] ?? '') ?? 0,
+                  ),
+                );
+              },
+            ),
           ],
         )
       ],
@@ -1100,7 +1122,7 @@ class _MyAppState extends State<MyApp> {
             return Sizer(
               builder: (context, orientation, deviceType) {
                 return MaterialApp.router(
-                  title: 'AIdea',
+                  title: 'AIdea111',
                   themeMode: appTheme.mode,
                   theme: createLightThemeData(),
                   darkTheme: createDarkThemeData(),

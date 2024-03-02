@@ -233,7 +233,7 @@ mixin AppLocale {
     uploading: '上传中...',
     robotIsThinkingMessage: '数字人正在思考中...',
     robotHasSomeError: '发送失败，重发该消息？',
-    appName: 'AIdea',
+    appName: 'AIdea111',
     chatAnywhere: '聊一聊',
     homeTitle: '数字人',
     creativeIsland: '创作岛',
@@ -429,7 +429,7 @@ mixin AppLocale {
     robotIsThinkingMessage: 'Thinking...',
     robotHasSomeError:
     'There seems to be something wrong, Do you want to resend the message?',
-    appName: 'AIdea',
+    appName: 'AIdea123',
     chatAnywhere: 'Chat',
     homeTitle: 'Characters',
     creativeIsland: 'Creative',
