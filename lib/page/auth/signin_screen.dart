@@ -188,7 +188,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     child: SizedBox(
                       width: 200,
                       height: 200,
-                      child: Image.asset('assets/app.png'),
+                      child: Image.asset('assets/app.webp'),
                     ),
                   ),
                   const SizedBox(height: 10),
