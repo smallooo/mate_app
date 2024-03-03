@@ -96,6 +96,9 @@ class _SettingScreenState extends State<SettingScreen> {
                 SettingsSection(
                   title: Text(AppLocale.custom.getString(context)),
                   tiles: [
+                    _buildPersonalInfoSetting(customColors),
+                    //个人信息设置
+                    _buildMateExpectSetting(customColors),
                     // 主题设置
                     _buildCommonThemeSetting(customColors),
                     // 语言设置
@@ -624,6 +627,45 @@ class _SettingScreenState extends State<SettingScreen> {
       },
     );
   }
+
+
+  SettingsTile _buildPersonalInfoSetting(CustomColors customColors) {
+    return SettingsTile.navigation(
+      title: const Text('个人信息'),
+      value: Text(
+        widget.settings.boolDefault(settingOpenAISelfHosted, false)
+            ? AppLocale.enable.getString(context)
+            : AppLocale.disable.getString(context),
+        style: TextStyle(
+          color: customColors.weakTextColor?.withAlpha(200),
+          fontSize: 13,
+        ),
+      ),
+      onPressed: (context) {
+        context.push('/setting/personal-info?source=setting');
+      },
+    );
+  }
+
+  SettingsTile _buildMateExpectSetting(CustomColors customColors) {
+    return SettingsTile.navigation(
+      title: const Text('择偶标准'),
+      value: Text(
+        widget.settings.boolDefault(settingOpenAISelfHosted, false)
+            ? AppLocale.enable.getString(context)
+            : AppLocale.disable.getString(context),
+        style: TextStyle(
+          color: customColors.weakTextColor?.withAlpha(200),
+          fontSize: 13,
+        ),
+      ),
+      onPressed: (context) {
+        context.push('/setting/mate-except?source=setting');
+      },
+    );
+  }
+  
+  
 
   SettingsTile _buildOpenAISelfHostedSetting(CustomColors customColors) {
     return SettingsTile.navigation(

@@ -428,8 +428,8 @@ class _SignInScreenState extends State<SignInScreen> {
         }
 
         // 微信登录功能
-        if (Ability().enableWechatSignin) {
-          if (PlatformTool.isAndroid() || installed.data == true) {
+        // if (Ability().enableWechatSignin) {
+        //   if (PlatformTool.isAndroid() || installed.data == true) {
             signInItems.add(SignInButtonBuilder(
               mini: true,
               shape: const CircleBorder(),
@@ -454,8 +454,8 @@ class _SignInScreenState extends State<SignInScreen> {
               text: '微信',
               icon: Icons.wechat,
             ));
-          }
-        }
+        //   }
+        // }
 
         if (signInItems.isEmpty) {
           return Container();

@@ -68,7 +68,7 @@ class Capabilities {
     this.disableDigitalHuman = false,
     this.disableChat = false,
     this.serviceStatusPage = '',
-    this.wechatSigninEnabled = false,
+    this.wechatSigninEnabled = true,
   });
 
   factory Capabilities.fromJson(Map<String, dynamic> json) {

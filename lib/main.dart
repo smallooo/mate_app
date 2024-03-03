@@ -53,8 +53,10 @@ import 'package:mate_app/page/setting/change_password.dart';
 import 'package:mate_app/page/setting/custom_home_models.dart';
 import 'package:mate_app/page/setting/destroy_account.dart';
 import 'package:mate_app/page/setting/diagnosis.dart';
+import 'package:mate_app/page/setting/mate_except.dart';
 import 'package:mate_app/page/setting/notification.dart';
 import 'package:mate_app/page/setting/openai_setting.dart';
+import 'package:mate_app/page/setting/personal_info.dart';
 import 'package:mate_app/page/setting/retrieve_password_screen.dart';
 import 'package:mate_app/page/setting/setting_screen.dart';
 import 'package:mate_app/page/setting/user_api_keys.dart';
@@ -564,6 +566,28 @@ class MyApp extends StatefulWidget {
                 BlocProvider(
                   create: (context) => BackgroundImageBloc(),
                   child: BackgroundSelectorScreen(setting: settingRepo),
+                ),
+              ),
+            ),
+            GoRoute(
+              name: 'setting-personal-info',
+              path: '/setting/personal-info',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) => transitionResolver(
+                PersonalInfoSettingScreen(
+                  settings: settingRepo,
+                  source: state.queryParameters['source'],
+                ),
+              ),
+            ),
+            GoRoute(
+              name: 'setting-mate-except',
+              path: '/setting/mate-except',
+              parentNavigatorKey: _shellNavigatorKey,
+              pageBuilder: (context, state) => transitionResolver(
+                MateExceptSettingScreen(
+                  settings: settingRepo,
+                  source: state.queryParameters['source'],
                 ),
               ),
             ),
