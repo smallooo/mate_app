@@ -22,7 +22,6 @@ import 'package:mate_app/page/chat/group/create.dart';
 import 'package:mate_app/page/chat/group/edit.dart';
 import 'package:mate_app/page/chat/home.dart';
 import 'package:mate_app/page/chat/home_chat.dart';
-import 'package:mate_app/page/chat/home_chat_history.dart';
 import 'package:mate_app/page/chat/room_chat.dart';
 import 'package:mate_app/page/chat/room_create.dart';
 import 'package:mate_app/page/chat/room_edit.dart';
@@ -427,23 +426,6 @@ class MyApp extends StatefulWidget {
                     state.queryParameters['show_initial_dialog'] == 'true',
                     reward:
                     int.tryParse(state.queryParameters['reward'] ?? '0'),
-                  ),
-                ),
-              ),
-            ),
-            GoRoute(
-              name: 'chat_chat_history',
-              path: '/chat-chat/history',
-              parentNavigatorKey: _shellNavigatorKey,
-              pageBuilder: (context, state) => transitionResolver(
-                MultiBlocProvider(
-                  providers: [
-                    BlocProvider(
-                        create: (context) => ChatChatBloc(chatMsgRepo)),
-                  ],
-                  child: HomeChatHistoryPage(
-                    setting: settingRepo,
-                    chatMessageRepo: chatMsgRepo,
                   ),
                 ),
               ),

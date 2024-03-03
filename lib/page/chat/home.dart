@@ -1,5 +1,3 @@
-
-
 import 'dart:io';
 import 'dart:math';
 
@@ -25,6 +23,7 @@ import '../../helper/global_store.dart';
 import '../../helper/haptic_feedback.dart';
 import '../../helper/helper.dart';
 import '../../lang/lang.dart';
+import '../../repo/api/creative.dart';
 import '../../repo/api/model.dart';
 import '../../repo/api_server.dart';
 import '../../repo/model/chat_history.dart';
@@ -59,61 +58,26 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class ChatModel {
-  String id;
-  String name;
-  Color backgroundColor;
-  String backgroundImage;
 
-  ChatModel({
-    required this.id,
-    required this.name,
-    required this.backgroundColor,
-    required this.backgroundImage,
-  });
-}
+class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+  TabController? _tabController;
+  static const int itemsPerPage = 10;
 
-class _HomePageState extends State<HomePage> {
-  final TextEditingController _textController = TextEditingController();
+  // Define the current page
+  int currentPage = 0;
 
-  ModelIndicator? currentModel;
+  // Define a flag to know if there's more data to load
+  bool hasMore = true;
 
-  List<HomeModelV2> models = [
-    HomeModelV2(
-      modelId: "openai:gpt-3.5-turbo",
-      modelName: 'GPT-3.5',
-      type: 'model',
-      id: 'openai:gpt-3.5-turbo',
-      supportVision: false,
-      name: 'GPT-3.5',
-      avatarUrl: 'https://ssl.aicode.cc/ai-server/assets/avatar/gpt35.png',
-    ),
-    HomeModelV2(
-      modelId: "openai:gpt-4",
-      modelName: 'GPT-4',
-      type: 'model',
-      id: 'openai:gpt-4',
-      supportVision: false,
-      name: 'GPT-4',
-      avatarUrl:
-      'https://ssl.aicode.cc/ai-server/assets/avatar/gpt4-preview.png',
-    ),
-  ];
-
-  /// 是否显示提示消息对话框
-  bool showFreeModelNotifyMessage = false;
-
-  List<FileUpload> selectedImageFiles = [];
-
-  /// 促销事件
-  PromotionEvent? promotionEvent;
+  // Define a list to hold the data
+  List<CreativeGallery> data = [];
 
   /// 用于监听键盘事件，实现回车发送消息，Shift+Enter换行
   late final FocusNode _focusNode = FocusNode(
     onKey: (node, event) {
       if (!event.isShiftPressed && event.logicalKey.keyLabel == 'Enter') {
         if (event is RawKeyDownEvent) {
-          onSubmit(context, _textController.text.trim());
+          // onSubmit(context, _textController.text.trim());
         }
 
         return KeyEventResult.handled;
@@ -125,893 +89,130 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
-    _textController.dispose();
+    _tabController?.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
     context.read<ChatChatBloc>().add(ChatChatLoadRecentHistories());
-
-    if (Ability().homeModels.isNotEmpty) {
-      models = Ability().homeModels;
-    }
-
-    // APIServer().capabilities().then((cap) {
-    //   Ability().updateCapabilities(cap);
-    //
-    //   if (cap.homeModels.isNotEmpty) {
-    //     models = cap.homeModels;
-    //
-    //     if (mounted) {
-    //       // 加载免费模型剩余使用次数
-    //       if (currentModel != null && currentModel!.model.modelId != null) {
-    //         context
-    //             .read<FreeCountBloc>()
-    //             .add(FreeCountReloadEvent(model: currentModel!.model.modelId!));
-    //       }
-    //
-    //       setState(() {});
-    //     }
-    //   }
-    // });
     
-
-    // 是否显示免费模型提示消息
-    Cache().boolGet(key: 'show_home_free_model_message').then((show) async {
-      if (show) {
-        final promotions = await APIServer().notificationPromotionEvents();
-        if (promotions['chat_page'] == null ||
-            promotions['chat_page']!.isEmpty) {
-          return;
-        }
-
-        // 多个促销事件，则随机选择一个
-        promotionEvent = promotions['chat_page']![
-        Random().nextInt(promotions['chat_page']!.length)];
-      }
-
-      setState(() {
-        showFreeModelNotifyMessage = show;
-      });
-    });
-
-    _textController.addListener(() {
-      setState(() {});
-    });
-
-    setState(() {
-      currentModel = ModelIndicator(
-        model: models[0],
-        iconAndColor: iconAndColors[0],
-      );
-    });
-
-    if (widget.showInitialDialog) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        showBeautyDialog(
-          context,
-          type: QuickAlertType.info,
-          text:
-          '恭喜您，账号创建成功！${(widget.reward != null && widget.reward! > 0) ? '\n\n为了庆祝这一时刻，我们向您的账户赠送了 ${widget.reward} 个智慧果。' : ''}',
-          confirmBtnText: '开始使用',
-          onConfirmBtnTap: () {
-            context.pop();
-          },
-        );
-      });
-    } else {
-      // 版本检查
-      APIServer().versionCheck().then((resp) {
-        final lastVersion = widget.setting.get('last_server_version');
-        if (resp.serverVersion == lastVersion && !resp.forceUpdate) {
-          return;
-        }
-
-        if (resp.hasUpdate) {
-          showBeautyDialog(
-            context,
-            type: QuickAlertType.success,
-            text: resp.message,
-            confirmBtnText: '去更新',
-            onConfirmBtnTap: () {
-              launchUrlString(resp.url, mode: LaunchMode.externalApplication);
-            },
-            cancelBtnText: '暂不更新',
-            showCancelBtn: true,
-          );
-        }
-
-        widget.setting.set('last_server_version', resp.serverVersion);
-      });
+    if (Ability().homeModels.isNotEmpty) {
+      // models = Ability().homeModels;
     }
-
+    
+    setState(() {});
+    
     super.initState();
+    _tabController = TabController(length: 5, vsync: this);
+    _loadMoreData();
   }
+
+  void _loadMoreData() {
+    if (!hasMore) return;
+
+    // Simulate a delay
+    Future.delayed(Duration(seconds: 2)).then((_) {
+      setState(() {
+        List<CreativeGallery> newItems = List<CreativeGallery>.generate(
+          itemsPerPage,
+              (index) => CreativeGallery(
+            id: index + currentPage * itemsPerPage,
+            previewImage: 'https://img.thebeastshop.com/file/app_image/36fe7f23342b4ecbafdcc37fe415ec42.jpg@90q',
+            username: 'User${index + currentPage * itemsPerPage}',
+            userId: index + currentPage * itemsPerPage,
+            hotValue: (index + currentPage * itemsPerPage) * 10, creativeType: 1, creativeId: '1',
+          ),
+        );
+
+        data.addAll(newItems);
+
+        // If we've reached the maximum number of items, set hasMore to false
+        if (data.length >= 5000) {
+          hasMore = false;
+        }
+
+        currentPage++;
+      });
+    });
+  }
+  
 
   Map<String, ModelIndicator> buildModelIndicators() {
     Map<String, ModelIndicator> map = {};
 
-    for (var i = 0; i < models.length; i++) {
-      var model = models[i];
-      map[model.id] = ModelIndicator(
-        model: model,
-        selected: model.id == currentModel?.model.id,
-        iconAndColor: iconAndColors[i],
-        itemCount: models.length,
-      );
-    }
+    // for (var i = 0; i < models.length; i++) {
+    //   var model = models[i];
+    //   map[model.id] = ModelIndicator(
+    //     model: model,
+    //     selected: model.id == currentModel?.model.id,
+    //     iconAndColor: iconAndColors[i],
+    //     itemCount: models.length,
+    //   );
+    // }
 
     return map;
   }
 
   @override
   Widget build(BuildContext context) {
-    var customColors = Theme.of(context).extension<CustomColors>()!;
-    return BackgroundContainer(
-      setting: widget.setting,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: BlocBuilder<ChatChatBloc, ChatChatState>(
-          buildWhen: (previous, current) =>
-          current is ChatChatRecentHistoriesLoaded,
-          builder: (context, state) {
-            if (true) {
-              return SliverSingleComponent(
-                title: Text(
-                  AppLocale.chatAnywhere.getString(context),
-                  style: TextStyle(
-                    fontSize: CustomSize.appBarTitleSize,
-                    color: customColors.backgroundInvertedColor,
-                  ),
-                ),
-                actions: [
-                  IconButton(
-                    icon: const Icon(Icons.history),
-                    onPressed: () {
-                      context.push('/chat-chat/history').whenComplete(() {
-                        context
-                            .read<ChatChatBloc>()
-                            .add(ChatChatLoadRecentHistories());
-                      });
-                    },
-                  ),
-                ],
-                backgroundImage: Image.asset(
-                  customColors.appBarBackgroundImage!,
-                  fit: BoxFit.cover,
-                ),
-                appBarExtraWidgets: () {
-                  return [
-                    SliverStickyHeader(
-                      // header: SafeArea(
-                      //   top: false,
-                      //   child:
-                      //   buildChatComponents(customColors, context, state),
-                      // ),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                              (context, index) {
-                            if (true) {  //index == 0
-                              return SafeArea(
-                                top: false,
-                                bottom: false,
-                                child: Container(
-                                  margin:
-                                  const EdgeInsets.only(top: 10, left: 15),
-                                  child: Text(
-                                    AppLocale.histories.getString(context),
-                                    style: TextStyle(
-                                      color: customColors.weakTextColor
-                                          ?.withAlpha(100),
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }
-
-                            // if (index == state.histories.length && index > 3) {
-                            //   return SafeArea(
-                            //     top: false,
-                            //     bottom: false,
-                            //     child: GestureDetector(
-                            //       onTap: () {
-                            //         context
-                            //             .push('/chat-chat/history')
-                            //             .whenComplete(() {
-                            //           context
-                            //               .read<ChatChatBloc>()
-                            //               .add(ChatChatLoadRecentHistories());
-                            //         });
-                            //       },
-                            //       child: Container(
-                            //         alignment: Alignment.center,
-                            //         margin: const EdgeInsets.only(
-                            //             top: 5, bottom: 15),
-                            //         child: Row(
-                            //           mainAxisAlignment:
-                            //           MainAxisAlignment.center,
-                            //           children: [
-                            //             Icon(
-                            //               Icons.keyboard_double_arrow_left,
-                            //               size: 12,
-                            //               color: customColors.weakTextColor!
-                            //                   .withAlpha(120),
-                            //             ),
-                            //             Text(
-                            //               "查看更多",
-                            //               style: TextStyle(
-                            //                 fontSize: 12,
-                            //                 color: customColors.weakTextColor!
-                            //                     .withAlpha(120),
-                            //               ),
-                            //             ),
-                            //             Icon(
-                            //               Icons.keyboard_double_arrow_right,
-                            //               size: 12,
-                            //               color: customColors.weakTextColor!
-                            //                   .withAlpha(120),
-                            //             ),
-                            //           ],
-                            //         ),
-                            //       ),
-                            //     ),
-                            //   );
-                            // }
-
-                            // return SafeArea(
-                            //   top: false,
-                            //   bottom: false,
-                            //   child: ChatHistoryItem(
-                            //     history: state.histories[index - 1],
-                            //     customColors: customColors,
-                            //     onTap: () {
-                            //       context
-                            //           .push(
-                            //           '/chat-anywhere?chat_id=${state.histories[index - 1].id}&model=${state.histories[index - 1].model}&title=${state.histories[index - 1].title}')
-                            //           .whenComplete(() {
-                            //         FocusScope.of(context)
-                            //             .requestFocus(FocusNode());
-                            //         context
-                            //             .read<ChatChatBloc>()
-                            //             .add(ChatChatLoadRecentHistories());
-                            //       });
-                            //     },
-                            //   ),
-                            // );
-                          },
-                          // childCount: state.histories.isNotEmpty
-                          //     ? state.histories.length + 1
-                          //     : 0,
-                          childCount: 0,
-                        ),
-                      ),
-                    ),
-                  ];
-                },
-              );
-            } else {
-              return const SizedBox();
-            }
-          },
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('相亲角'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: [
+            Tab(text: '推荐'),
+            Tab(text: '男生'),
+            Tab(text: '女生'),
+            Tab(text: '同城'),
+            Tab(text: '同省'),
+          ],
         ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildGridView(),
+          _buildGridView(),
+          _buildGridView(),
+          _buildGridView(),
+          _buildGridView(),
+        ],
       ),
     );
   }
 
-  Container buildChatComponents(
-      CustomColors customColors,
-      BuildContext context,
-      ChatChatRecentHistoriesLoaded state,
-      ) {
-    final indicators = buildModelIndicators();
-    return Container(
-      color: customColors.backgroundContainerColor,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (Ability().showGlobalAlert) const GlobalAlert(pageKey: 'home'),
-          if (showFreeModelNotifyMessage && promotionEvent != null)
-          // 首页通知消息组件
-            buildNotifyMessageWidget(context),
-          // 模型选择
-          Container(
-            margin: const EdgeInsets.only(
-              left: 10,
-              right: 10,
-            ),
-            padding: const EdgeInsets.only(
-              left: 5,
-              right: 5,
-              top: 10,
-            ),
-            child: CustomSlidingSegmentedControl<String>(
-              children: indicators,
-              padding: 0,
-              isStretch: true,
-              height: Ability().showHomeModelDescription ? 60 : 45,
-              innerPadding: const EdgeInsets.all(0),
-              decoration: BoxDecoration(
-                color: customColors.columnBlockBackgroundColor?.withAlpha(150),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              thumbDecoration: BoxDecoration(
-                color: currentModel?.iconAndColor.color,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInToLinear,
-              onValueChanged: (value) {
-                currentModel = indicators[value];
-
-                // 重新读取模型的免费使用次数
-                if (currentModel != null &&
-                    currentModel!.model.modelId != null) {
-                  context.read<FreeCountBloc>().add(FreeCountReloadEvent(
-                      model: currentModel!.model.modelId!));
-                }
-
-                setState(() {});
-              },
-            ),
-          ),
-          // 聊天内容输入框
-          Padding(
-            padding: const EdgeInsets.only(
-              left: 10,
-              right: 10,
-              top: 10,
-            ),
-            child: ColumnBlock(
-              padding: const EdgeInsets.only(
-                top: 5,
-                bottom: 5,
-                left: 15,
-                right: 15,
-              ),
+  Widget _buildGridView() {
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+      ),
+      itemCount: data.length + (hasMore ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index == data.length) {
+          // If we're at the end of the list and there's more data, show a loading indicator
+          _loadMoreData();
+          return Center(child: CircularProgressIndicator());
+        } else {
+          // Otherwise, show the data
+          return Center(
+            child: Column(
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 聊天问题输入框
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (currentModel != null)
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              top: 12,
-                              right: 4,
-                            ),
-                            child: Icon(
-                              Icons.circle,
-                              color: currentModel?.iconAndColor.color,
-                              size: 10,
-                            ),
-                          ),
-                        Expanded(
-                          child: EnhancedTextField(
-                            focusNode: _focusNode,
-                            controller: _textController,
-                            customColors: customColors,
-                            maxLines: 10,
-                            minLines: 6,
-                            hintText:
-                            AppLocale.askMeAnyQuestion.getString(context),
-                            maxLength: 150000,
-                            showCounter: false,
-                            hintColor: customColors.textfieldHintDeepColor,
-                            hintTextSize: 15,
-                          ),
-                        ),
-                      ],
-                    ),
-                    // 聊天控制工具栏
-                    Container(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: _buildSendOrVoiceButton(
-                        context,
-                        customColors,
-                      ),
-                    ),
-                    if (selectedImageFiles.isNotEmpty &&
-                        currentModel != null &&
-                        currentModel!.model.supportVision)
-                      SizedBox(
-                        height: 110,
-                        child: ListView(
-                          scrollDirection: Axis.horizontal,
-                          children: selectedImageFiles
-                              .map(
-                                (e) => Container(
-                              margin: const EdgeInsets.only(right: 8),
-                              padding: const EdgeInsets.all(5),
-                              child: Stack(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(5),
-                                    child: e.file.bytes != null
-                                        ? Image.memory(
-                                      e.file.bytes!,
-                                      fit: BoxFit.cover,
-                                      width: 100,
-                                      height: 100,
-                                    )
-                                        : Image.file(
-                                      File(e.file.path!),
-                                      fit: BoxFit.cover,
-                                      width: 100,
-                                      height: 100,
-                                    ),
-                                  ),
-                                  Positioned(
-                                    right: 5,
-                                    top: 5,
-                                    child: InkWell(
-                                      onTap: () {
-                                        setState(() {
-                                          selectedImageFiles.remove(e);
-                                        });
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.all(3),
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                          BorderRadius.circular(10),
-                                          color: customColors
-                                              .chatRoomBackground,
-                                        ),
-                                        child: Icon(
-                                          Icons.close,
-                                          size: 10,
-                                          color: customColors.weakTextColor,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          )
-                              .toList(),
-                        ),
-                      )
-                  ],
-                )
+                Image.network(
+                  data[index].preview,
+                  width: 100,
+                  height: 100,
+                ),
+                Text(
+                  data[index].username! + ' ' + data[index].hotValue.toString(),
+                  style: Theme.of(context).textTheme.headline5,
+                ),
               ],
             ),
-          ),
-          // 问题示例
-          if (state.examples != null &&
-              state.examples!.isNotEmpty &&
-              state.histories.isEmpty)
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              padding:
-              const EdgeInsets.only(top: 5, left: 10, right: 10, bottom: 3),
-              margin: const EdgeInsets.all(10),
-              height: 260,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Image.asset(
-                        'assets/app-256-transparent.png',
-                        width: 20,
-                        height: 20,
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        AppLocale.askMeLikeThis.getString(context),
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: customColors.textfieldHintDeepColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Expanded(
-                    child: ListView.separated(
-                      padding: const EdgeInsets.all(0),
-                      itemCount: state.examples!.length > 4
-                          ? 4
-                          : state.examples!.length,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemBuilder: (context, index) {
-                        return ListTextItem(
-                          title: state.examples![index].title,
-                          onTap: () {
-                            onSubmit(
-                              context,
-                              state.examples![index].text,
-                            );
-                          },
-                          customColors: customColors,
-                        );
-                      },
-                      separatorBuilder: (BuildContext context, int index) {
-                        return Divider(
-                          color:
-                          customColors.chatExampleItemText?.withAlpha(20),
-                        );
-                      },
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      style: ButtonStyle(
-                        overlayColor:
-                        MaterialStateProperty.all(Colors.transparent),
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          state.examples!.shuffle();
-                        });
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Icon(
-                            Icons.refresh,
-                            color: customColors.weakTextColor,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 3),
-                          Text(
-                            AppLocale.refresh.getString(context),
-                            style: TextStyle(
-                              color: customColors.weakTextColor,
-                            ),
-                            textScaleFactor: 0.9,
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  NotifyMessageWidget buildNotifyMessageWidget(BuildContext context) {
-    return NotifyMessageWidget(
-      title: promotionEvent!.title != null
-          ? Text(
-        promotionEvent!.title!,
-        style: TextStyle(
-          color: stringToColor(promotionEvent!.textColor ?? 'FFFFFFFF'),
-          fontWeight: FontWeight.bold,
-        ),
-      )
-          : null,
-      backgroundImageUrl: promotionEvent!.backgroundImage,
-      height: 85,
-      closeable: promotionEvent!.closeable,
-      onClose: () {
-        setState(() {
-          showFreeModelNotifyMessage = false;
-        });
-
-        Cache().setBool(
-          key: 'show_home_free_model_message',
-          value: false,
-          duration: Duration(days: promotionEvent!.maxCloseDurationInDays ?? 7),
-        );
+          );
+        }
       },
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Text(
-              promotionEvent!.content,
-              style: TextStyle(
-                color: stringToColor(promotionEvent!.textColor ?? 'FFFFFFFF'),
-                fontSize: 14,
-                overflow: TextOverflow.ellipsis,
-              ),
-              maxLines: 2,
-            ),
-          ),
-          if (promotionEvent!.clickButtonType !=
-              PromotionEventClickButtonType.none &&
-              promotionEvent!.clickValue != null &&
-              promotionEvent!.clickValue!.isNotEmpty)
-            InkWell(
-              onTap: () {
-                switch (promotionEvent!.clickButtonType) {
-                  case PromotionEventClickButtonType.url:
-                    if (promotionEvent!.clickValue != null &&
-                        promotionEvent!.clickValue!.isNotEmpty) {
-                      launchUrlString(promotionEvent!.clickValue!,
-                          mode: LaunchMode.externalApplication);
-                    }
-                    break;
-                  case PromotionEventClickButtonType.inAppRoute:
-                    if (promotionEvent!.clickValue != null &&
-                        promotionEvent!.clickValue!.isNotEmpty) {
-                      context.push(promotionEvent!.clickValue!);
-                    }
-
-                    break;
-                  case PromotionEventClickButtonType.none:
-                }
-              },
-              child: Row(
-                children: [
-                  Text(
-                    '详情',
-                    style: TextStyle(
-                      color: stringToColor(
-                          promotionEvent!.clickButtonColor ?? 'FFFFFFFF'),
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(width: 5),
-                  Icon(
-                    Icons.keyboard_double_arrow_right,
-                    size: 16,
-                    color: stringToColor(
-                        promotionEvent!.clickButtonColor ?? 'FFFFFFFF'),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  /// 构建发送或者语音按钮
-  Widget _buildSendOrVoiceButton(
-      BuildContext context,
-      CustomColors customColors,
-      ) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Row(
-          children: [
-            InkWell(
-              onTap: () {
-                HapticFeedbackHelper.mediumImpact();
-
-                openModalBottomSheet(
-                  context,
-                      (context) {
-                    return VoiceRecord(
-                      onFinished: (text) {
-                        _textController.text = _textController.text + text;
-                        Navigator.pop(context);
-                      },
-                      onStart: () {},
-                    );
-                  },
-                  isScrollControlled: false,
-                  heightFactor: 0.8,
-                );
-              },
-              child: Icon(
-                Icons.mic,
-                color: customColors.chatInputPanelText,
-                size: 28,
-              ),
-            ),
-            const SizedBox(width: 10),
-            if (currentModel != null && currentModel!.model.supportVision)
-              InkWell(
-                onTap: () async {
-                  // 上传图片
-                  HapticFeedbackHelper.mediumImpact();
-                  if (selectedImageFiles.length >= 4) {
-                    showSuccessMessage('最多只能上传 4 张图片');
-                    return;
-                  }
-
-                  FilePickerResult? result =
-                  await FilePicker.platform.pickFiles(
-                    type: FileType.image,
-                    allowMultiple: true,
-                  );
-                  if (result != null && result.files.isNotEmpty) {
-                    final files = selectedImageFiles;
-                    files.addAll(
-                        result.files.map((e) => FileUpload(file: e)).toList());
-                    setState(() {
-                      selectedImageFiles =
-                          files.sublist(0, files.length > 4 ? 4 : files.length);
-                    });
-                  }
-                },
-                child: Icon(
-                  Icons.camera_alt,
-                  color: customColors.chatInputPanelText,
-                  size: 28,
-                ),
-              ),
-          ],
-        ),
-        BlocBuilder<FreeCountBloc, FreeCountState>(
-          buildWhen: (previous, current) => current is FreeCountLoadedState,
-          builder: (context, state) {
-            if (state is FreeCountLoadedState) {
-              if (currentModel != null && currentModel!.model.modelId != null) {
-                final matched = state.model(currentModel!.model.modelId!);
-                if (matched != null &&
-                    matched.leftCount > 0 &&
-                    matched.maxCount > 0) {
-                  return Text(
-                    '今日还可免费畅享 ${matched.leftCount} 次',
-                    style: TextStyle(
-                      color: customColors.weakTextColor?.withAlpha(120),
-                      fontSize: 11,
-                    ),
-                  );
-                }
-              }
-            }
-            return const SizedBox();
-          },
-        ),
-        InkWell(
-          onTap: () {
-            onSubmit(context, _textController.text.trim());
-          },
-          child: Icon(
-            Icons.send,
-            color: _textController.text.trim().isNotEmpty
-                ? customColors.linkColor ??
-                const Color.fromARGB(255, 70, 165, 73)
-                : customColors.chatInputPanelText,
-            size: 26,
-          ),
-        )
-      ],
-    );
-  }
-
-  void onSubmit(BuildContext context, String text) {
-    if (text.trim().isEmpty) {
-      return;
-    }
-
-    if (currentModel != null && currentModel!.model.supportVision) {
-      GlobalStore().uploadedFiles = selectedImageFiles;
-    }
-
-    selectedImageFiles = [];
-
-    context
-        .push(Uri(path: '/chat-anywhere', queryParameters: {
-      'init_message': text,
-      'model': 'v2@${currentModel?.model.uniqueKey}',
-    }).toString())
-        .whenComplete(() {
-      _textController.clear();
-      GlobalStore().uploadedFiles.clear();
-
-      FocusScope.of(context).requestFocus(FocusNode());
-      context.read<ChatChatBloc>().add(ChatChatLoadRecentHistories());
-    });
-  }
-}
-
-class ChatHistoryItem extends StatelessWidget {
-  const ChatHistoryItem({
-    super.key,
-    required this.history,
-    required this.customColors,
-    required this.onTap,
-  });
-
-  final ChatHistory history;
-  final CustomColors customColors;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(
-        horizontal: 15,
-        vertical: 5,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Slidable(
-        endActionPane: ActionPane(
-          motion: const ScrollMotion(),
-          children: [
-            const SizedBox(width: 10),
-            SlidableAction(
-              label: AppLocale.delete.getString(context),
-              borderRadius: BorderRadius.circular(10),
-              backgroundColor: Colors.red,
-              icon: Icons.delete,
-              onPressed: (_) {
-                openConfirmDialog(
-                  context,
-                  AppLocale.confirmDelete.getString(context),
-                      () {
-                    context
-                        .read<ChatChatBloc>()
-                        .add(ChatChatDeleteHistory(history.id!));
-                  },
-                  danger: true,
-                );
-              },
-            ),
-          ],
-        ),
-        child: Material(
-          color: customColors.backgroundColor?.withAlpha(200),
-          borderRadius: BorderRadius.all(
-            Radius.circular(customColors.borderRadius ?? 8),
-          ),
-          child: InkWell(
-            child: ListTile(
-              contentPadding:
-              const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              shape: RoundedRectangleBorder(
-                borderRadius:
-                BorderRadius.circular(customColors.borderRadius ?? 8),
-              ),
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      (history.title ?? '未命名').trim(),
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: customColors.weakTextColor,
-                        fontSize: 15,
-                      ),
-                      maxLines: 1,
-                    ),
-                  ),
-                  Text(
-                    humanTime(history.updatedAt),
-                    style: TextStyle(
-                      color: customColors.weakTextColor?.withAlpha(65),
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-              dense: true,
-              subtitle: Padding(
-                padding: const EdgeInsets.only(top: 5),
-                child: Text(
-                  (history.lastMessage ?? '暂无内容').trim().replaceAll("\n", " "),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: customColors.weakTextColor?.withAlpha(150),
-                    fontSize: 12,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ),
-              onTap: () {
-                HapticFeedbackHelper.lightImpact();
-                onTap();
-              },
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
